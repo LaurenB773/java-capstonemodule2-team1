@@ -20,28 +20,13 @@ public class JdbcTransferDao implements TransferDao {
     @Override
     public List<Transfer> getAccountTransfers(int accountId) {
         List<Transfer> transfers = new ArrayList<>();
-        String sql = "select * from transfers where user_from_id = ? order by transfer_id;";
-        String sql2 = "select * from transfers where user_to_id  = ? order by transfer_id;";
+        String sql = "select * from transfers join account_transfers on (transfer_id) where account_id = ? order by transfer_id;";
 
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
 
             while (results.next()) {
                 Transfer transfer = mapToTransfer(results);
-
-                transfers.add(transfer);
-            }
-
-        } catch (CannotGetJdbcConnectionException e) {
-            throw new DaoException("Unable to connect to server or database", e);
-        }
-
-        try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql2, accountId);
-
-            while (results.next()) {
-                Transfer transfer = mapToTransfer(results);
-
                 transfers.add(transfer);
             }
 
@@ -127,7 +112,7 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setUserFromId(results.getInt("user_from_id"));
         transfer.setUserToId(results.getInt("user_to_id"));
         transfer.setAmountToTransfer(results.getDouble("amount_to_transfer"));
-        transfer.setSuccessful(results.getBoolean("is_sucessful"));
+        transfer.setSuccessful(results.getBoolean("is_successful"));
         return transfer;
     }
 
