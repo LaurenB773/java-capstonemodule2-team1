@@ -6,10 +6,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class JdbcTransferDao implements TransferDao {
     private JdbcTemplate jdbcTemplate;
 
@@ -20,7 +22,9 @@ public class JdbcTransferDao implements TransferDao {
     @Override
     public List<Transfer> getAccountTransfers(int accountId) {
         List<Transfer> transfers = new ArrayList<>();
-        String sql = "select * from transfers join account_transfers on (transfer_id) where account_id = ? order by transfer_id;";
+        String sql = "select * from transfers " +
+                "join account_transfers on (transfer_id) where account_id = ? " +
+                "order by transfer_id;";
 
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
@@ -84,7 +88,8 @@ public class JdbcTransferDao implements TransferDao {
     @Override
     public Transfer updateTransfer(Transfer transfer) {
         Transfer updatedTransfer = null;
-        String sql = "update transfers set user_from_id = ?, user_to_id = ?, amount_to_transfer = ?, is_successful = ? where transfer_id = ?;";
+        String sql = "update transfers set user_from_id = ?, user_to_id = ?, " +
+                "amount_to_transfer = ?, is_successful = ? where transfer_id = ?;";
 
         try {
             int rowsAffected = jdbcTemplate.update(sql, transfer.getUserFromId(),

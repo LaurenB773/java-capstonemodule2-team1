@@ -1,6 +1,7 @@
 package com.techelevator.tebucks.security.dao;
 
 import com.techelevator.tebucks.exception.DaoException;
+import com.techelevator.tebucks.model.Account;
 import com.techelevator.tebucks.security.model.RegisterUserDto;
 import com.techelevator.tebucks.security.model.User;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -85,7 +86,20 @@ public class JdbcUserDao implements UserDao {
                 throw new DaoException("Could not create user");
             }
 
-            // TODO: Create account for the user with a starting balance of $1000
+            String query = "insert into accounts (user_id, balance) values (?, ?) returning account_id;";
+
+            try {
+                Integer newAccountId = jdbcTemplate.queryForObject(query, int.class, newUserId, Account.STARTING_BALANCE);
+
+                if (newAccountId == null) {
+                    throw new DaoException("Could not create account");
+                }
+
+            } catch (CannotGetJdbcConnectionException e) {
+                throw new DaoException("Unable to connect to server or database", e);
+            } catch (DataIntegrityViolationException e) {
+                throw new DaoException("Data integrity violation", e);
+            }
 
             return getUserById(newUserId);
         } catch (CannotGetJdbcConnectionException e) {
