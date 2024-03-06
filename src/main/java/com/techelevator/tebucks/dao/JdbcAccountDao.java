@@ -17,18 +17,20 @@ public class JdbcAccountDao implements AccountDao {
 
     @Override
     public Account getAccountBalance(int id) {
-        Account accountBalance = null;
-        String sql = "select * from account where account_id = ?;";
+        Account accountBalance = new Account();
+        String sql = "select * from accounts where user_id = ?;";
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
             if (results.next()) {
+                accountBalance.setAccountId(results.getInt("account_id"));
                 accountBalance.setUserId(results.getInt("user_id"));
                 accountBalance.setBalance(results.getDouble("balance"));
+                return accountBalance;
             }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);
         }
-        return accountBalance;
+        return null;
     }
 
 }
