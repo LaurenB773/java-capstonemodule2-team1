@@ -31,4 +31,15 @@ CREATE TABLE accounts (
     CONSTRAINT CHK_balance_not_negative CHECK (balance >= 0)
 );
 
+CREATE TABLE account_transfers(
+	account_id int REFERENCES accounts (account_id) NOT NULL,
+	transfer_id int REFERENCES transfers (transfer_id) NOT NULL,
+	CONSTRAINT pk_account_transfer PRIMARY KEY (account_id, transfer_id)
+);
+
+
+
 COMMIT TRANSACTION;
+
+
+
