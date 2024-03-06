@@ -5,7 +5,7 @@ public class Transfer {
     private int userFromId;
     private int userToId;
     private Double amountToTransfer;
-    private boolean isSucessful;
+    private boolean isSuccessful;
 
     public int getTransferId() {
         return transferId;
@@ -39,11 +39,11 @@ public class Transfer {
         this.amountToTransfer = amountToTransfer;
     }
 
-    public boolean isSucessful() {
-        return isSucessful;
+    public boolean isSuccessful() {
+        return isSuccessful;
     }
 
-    public void setSucessful(boolean sucessful) {
-        isSucessful = sucessful;
+    public void setSuccessful(boolean successful) {
+        isSuccessful = successful;
     }
 }
