@@ -32,6 +32,3 @@ CREATE TABLE accounts (
 );
 
 COMMIT TRANSACTION;
-
-
-
