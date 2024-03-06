@@ -10,6 +10,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class JdbcUserDao implements UserDao {
 
@@ -17,6 +19,23 @@ public class JdbcUserDao implements UserDao {
 
     public JdbcUserDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public List<User> getUserList() {
+        List<User> users = null;
+        String sql = "select * from users order by user_id;";
+
+        try {
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+            while (results.next()) {
+                User user = mapRowToUser(results);
+                users.add(user);
+            }
+
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Unable to connect to server or database", e);
+        }
+        return users;
     }
 
     public User getUserById(int userId) {
