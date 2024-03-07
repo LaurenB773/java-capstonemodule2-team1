@@ -1,14 +1,10 @@
 package com.techelevator.tebucks.model;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 
 public class Account {
     public static final Double STARTING_BALANCE = 1000.00;
-    @NotBlank
     private int accountId;
-    @NotBlank
     private int userId;
     @Min(0)
     private Double balance;

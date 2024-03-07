@@ -1,16 +1,10 @@
 package com.techelevator.tebucks.model;
 
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import java.security.Principal;
 
 public class Transfer {
-    @NotBlank
     private int transferId;
-    @NotBlank
     private int userFromId;
-    @NotBlank
     private int userToId;
     private Double amountToTransfer;
     private boolean isSuccessful;
@@ -19,6 +13,7 @@ public class Transfer {
     private boolean isUserFromDifferentThanUserTo() {
         return userFromId != userToId;
     }
+
     @AssertTrue(message = "Cannot send $0 or less.")
     private boolean isAmountToTransferGt0() {
         return amountToTransfer > 0;
