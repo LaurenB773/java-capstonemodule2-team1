@@ -4,7 +4,9 @@ import com.techelevator.tebucks.dao.AccountDao;
 import com.techelevator.tebucks.dao.TransferDao;
 import com.techelevator.tebucks.exception.DaoException;
 import com.techelevator.tebucks.model.Account;
+import com.techelevator.tebucks.model.NewTransferDto;
 import com.techelevator.tebucks.model.Transfer;
+import com.techelevator.tebucks.model.TransferStatusUpdateDto;
 import com.techelevator.tebucks.security.dao.UserDao;
 import com.techelevator.tebucks.security.model.User;
 import org.springframework.http.HttpStatus;
@@ -23,11 +25,16 @@ public class TransferController {
     private TransferDao transferDao;
     private AccountDao accountDao;
     private UserDao userDao;
+    private NewTransferDto newTransferDto;
+    private TransferStatusUpdateDto transferStatusUpdateDto;
 
-    public TransferController(TransferDao transferDao, AccountDao accountDao, UserDao userDao) {
+    public TransferController(TransferDao transferDao, AccountDao accountDao, UserDao userDao,
+                              NewTransferDto newTransferDto, TransferStatusUpdateDto transferStatusUpdateDto) {
         this.transferDao = transferDao;
         this.accountDao = accountDao;
         this.userDao = userDao;
+        this.newTransferDto = newTransferDto;
+        this.transferDao = transferDao;
     }
 
     @GetMapping("/account/balance")
@@ -56,13 +63,20 @@ public class TransferController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transfers")
-    public Transfer createTransfer(@Valid @RequestBody Transfer transfer) {
-        return transferDao.createTransfer(transfer);
+    public Transfer createTransfer(@Valid @RequestBody NewTransferDto newTransfer) {
+        return transferDao.createTransfer(newTransfer);
     }
 
     @PutMapping("/transfers/{id}/status")
     public Transfer updateTransfer(@Valid @RequestBody Transfer transferToUpdate,
                                    @PathVariable int id) {
+        //TODO: change Transfer object to Transfer Status DTO
+
+        /*
+        find transfer object by path variable
+        ensure valid transfer and that princple has access
+        update transfer based on status
+         */
         if (id != transferToUpdate.getTransferId() && transferToUpdate.getTransferId() != 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Transfer ids are in conflict.");
         }
