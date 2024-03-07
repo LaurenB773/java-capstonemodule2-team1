@@ -45,7 +45,7 @@ public class JdbcAccountDao implements AccountDao {
                 "where user_id = ?; " +
                 "commit;";
         try {
-            int rowsAffected = jdbcTemplate.update(sql, fromUserId, amount, toUserId, amount);
+            int rowsAffected = jdbcTemplate.update(sql, amount, fromUserId, amount, toUserId);
 
 
         } catch (CannotGetJdbcConnectionException e) {
@@ -64,13 +64,7 @@ public class JdbcAccountDao implements AccountDao {
                 "where user_id = ?; " +
                 "commit;";
         try {
-            int rowsAffected = jdbcTemplate.update(sql, fromUserId, amount, toUserId, amount);
-
-            if (rowsAffected == 2) {
-                throw new ResponseStatusException(HttpStatus.ACCEPTED);
-            } else {
-                throw new DaoException("Zero rows affected, expected at least two.");
-            }
+            jdbcTemplate.update(sql, amount, toUserId, amount, fromUserId);
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);

@@ -72,7 +72,11 @@ public class TransferController {
         if (createdTransfer.getTransferType().equals("Send")) {
             accountDao.updateBalanceSend(fromUser, toUser, amount);
         } else if (createdTransfer.getTransferType().equals("Request")) {
-            accountDao.updateBalanceRequest(fromUser, toUser, amount);
+            if (transferStatusUpdateDto.getTransferStatus().equals("Approved")) {
+                accountDao.updateBalanceRequest(fromUser, toUser, amount);
+            } else if (transferStatusUpdateDto.getTransferStatus().equals("Rejected")) {
+                throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
+            }
         }
         return createdTransfer;
     }
