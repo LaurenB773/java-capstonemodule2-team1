@@ -12,7 +12,7 @@ public class NewTransferDto {
 
     private int userFrom;
     private int userTo;
-    private Double amount;
+    private double amount;
     private String transferType;
 
     @AssertTrue(message = "Cannot send money to yourself.")
@@ -46,11 +46,11 @@ public class NewTransferDto {
         this.userTo = userTo;
     }
 
-    public Double getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 
