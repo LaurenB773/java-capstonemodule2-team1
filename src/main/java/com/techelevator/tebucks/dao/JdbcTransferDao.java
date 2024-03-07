@@ -1,6 +1,7 @@
 package com.techelevator.tebucks.dao;
 
 import com.techelevator.tebucks.exception.DaoException;
+import com.techelevator.tebucks.model.NewTransferDto;
 import com.techelevator.tebucks.model.Transfer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -61,40 +62,40 @@ public class JdbcTransferDao implements TransferDao {
 
 
     @Override
-    public Transfer createTransfer(Transfer transfer) {
-        Transfer newTransfer;
-        String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer, is_successful) " +
-                "values(?, ?, ?, ?) returning transfer_id;";
+    public Transfer createTransfer(NewTransferDto newTransfer) {
+        String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer) " +
+                "values(?, ?, ?) returning transfer_id;";
 
         try {
             Integer transferId = jdbcTemplate.queryForObject(sql, Integer.class,
-                    transfer.getUserFromId(), transfer.getUserToId(),
-                    transfer.getAmountToTransfer(), transfer.isSuccessful());
+                    newTransfer.getUserFrom(), newTransfer. getUserTo(),
+                    newTransfer.getAmount());
 
             if (transferId == null) {
                 throw new DaoException("Could not create transfer.");
             }
 
-            newTransfer = getTransferById(transferId);
+            return getTransferById(transferId);
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data integrity violation", e);
         }
 
-        return newTransfer;
     }
 
     @Override
     public Transfer updateTransfer(Transfer transfer) {
         Transfer updatedTransfer = null;
         String sql = "update transfers set user_from_id = ?, user_to_id = ?, " +
-                "amount_to_transfer = ?, is_successful = ? where transfer_id = ?;";
+                "amount_to_transfer = ?, status = ? where transfer_id = ?;";
+
+        //TODO: add status from transfer status DTO
 
         try {
             int rowsAffected = jdbcTemplate.update(sql, transfer.getUserFromId(),
                     transfer.getUserToId(), transfer.getAmountToTransfer(),
-                    transfer.isSuccessful(), transfer.getTransferId());
+                    transfer.getTransferId());
 
             if (rowsAffected == 0) {
                 throw new DaoException("Zero rows affected, expected at least one.");
@@ -117,7 +118,6 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setUserFromId(results.getInt("user_from_id"));
         transfer.setUserToId(results.getInt("user_to_id"));
         transfer.setAmountToTransfer(results.getDouble("amount_to_transfer"));
-        transfer.setSuccessful(results.getBoolean("is_successful"));
         return transfer;
     }
 

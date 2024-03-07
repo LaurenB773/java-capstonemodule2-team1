@@ -1,7 +1,11 @@
 package com.techelevator.tebucks.model;
 
-import java.text.DecimalFormat;
+import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.AssertTrue;
+import java.util.Objects;
+
+@Component
 public class NewTransferDto {
     /*
     {
@@ -12,10 +16,28 @@ public class NewTransferDto {
      }
      */
 
+    private final String SEND = "Send";
+    private final String REQUEST = "Request";
+
     private int userFrom;
     private int userTo;
     private Double amount;
     private String transferType;
+
+    @AssertTrue(message = "Cannot send money to yourself.")
+    private boolean isUserFromDifferentThanUserTo() {
+        return userFrom != userTo;
+    }
+
+    @AssertTrue(message = "Cannot send $0 or less.")
+    private boolean isAmountToTransferGt0() {
+        return amount > 0;
+    }
+
+    @AssertTrue(message = "Transfer type must be a send or request.")
+    private boolean isTransferTypeSendOrRequest() {
+        return Objects.equals(transferType, SEND) || Objects.equals(transferType, REQUEST);
+    }
 
     public int getUserFrom() {
         return userFrom;
