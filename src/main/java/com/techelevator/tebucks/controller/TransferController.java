@@ -68,23 +68,23 @@ public class TransferController {
     }
 
     @PutMapping("/transfers/{id}/status")
-    public Transfer updateTransfer(@Valid @RequestBody Transfer transferToUpdate,
-                                   @PathVariable int id) {
-        //TODO: change Transfer object to Transfer Status DTO
-
-        /*
-        find transfer object by path variable
-        ensure valid transfer and that princple has access
-        update transfer based on status
-         */
+    public Transfer updateTransfer(@Valid @RequestBody TransferStatusUpdateDto transferStatus,
+                                   @PathVariable int id, Principal principal) {
+        Transfer transferToUpdate = getTransferById(id);
+        
         if (id != transferToUpdate.getTransferId() && transferToUpdate.getTransferId() != 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Transfer ids are in conflict.");
         }
 
         transferToUpdate.setTransferId(id);
 
+        User loggedInUser = getLoggedInUserByPrincipal(principal);
+        if (transferToUpdate.getUserFromId() != loggedInUser.getId()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this account.");
+        }
+
         try {
-            return transferDao.updateTransfer(transferToUpdate);
+            return transferDao.updateTransfer(transferStatus, id);
         } catch (DaoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found.");
         }

@@ -3,6 +3,7 @@ package com.techelevator.tebucks.dao;
 import com.techelevator.tebucks.exception.DaoException;
 import com.techelevator.tebucks.model.NewTransferDto;
 import com.techelevator.tebucks.model.Transfer;
+import com.techelevator.tebucks.model.TransferStatusUpdateDto;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -85,23 +86,22 @@ public class JdbcTransferDao implements TransferDao {
     }
 
     @Override
-    public Transfer updateTransfer(Transfer transfer) {
-        Transfer updatedTransfer = null;
+    public Transfer updateTransfer(TransferStatusUpdateDto transfer, int transferId) {
+        Transfer updatedTransfer = getTransferById(transferId);
         String sql = "update transfers set user_from_id = ?, user_to_id = ?, " +
                 "amount_to_transfer = ?, status = ? where transfer_id = ?;";
 
         //TODO: add status from transfer status DTO
 
         try {
-            int rowsAffected = jdbcTemplate.update(sql, transfer.getUserFromId(),
-                    transfer.getUserToId(), transfer.getAmountToTransfer(),
-                    transfer.getTransferId());
+            int rowsAffected = jdbcTemplate.update(sql, updatedTransfer.getUserFromId(), updatedTransfer.getUserToId(),
+                    updatedTransfer.getAmountToTransfer(), transfer.getTransferStatus());
 
             if (rowsAffected == 0) {
                 throw new DaoException("Zero rows affected, expected at least one.");
             }
 
-            updatedTransfer = getTransferById(transfer.getTransferId());
+            updatedTransfer = getTransferById(updatedTransfer.getTransferId());
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
