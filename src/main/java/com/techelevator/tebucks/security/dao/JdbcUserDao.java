@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -23,7 +24,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     public List<User> getUserList() {
-        List<User> users = null;
+        List<User> users = new ArrayList<>();
         String sql = "select * from users order by user_id;";
 
         try {
