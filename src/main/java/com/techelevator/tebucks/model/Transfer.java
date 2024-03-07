@@ -5,6 +5,7 @@ public class Transfer {
     private int userFromId;
     private int userToId;
     private Double amountToTransfer;
+    private String status;
 
     public int getTransferId() {
         return transferId;
@@ -38,4 +39,11 @@ public class Transfer {
         this.amountToTransfer = amountToTransfer;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
