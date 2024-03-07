@@ -3,6 +3,7 @@ package com.techelevator.tebucks.model;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import java.security.Principal;
 
 public class Transfer {
     @NotBlank
