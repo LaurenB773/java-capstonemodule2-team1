@@ -1,6 +1,6 @@
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS users, transfers, accounts;
+DROP TABLE IF EXISTS users, transfers, accounts, account_transfers;
 
 CREATE TABLE users (
     user_id serial NOT NULL,
