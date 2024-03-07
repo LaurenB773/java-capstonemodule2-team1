@@ -22,14 +22,14 @@ public class JdbcTransferDao implements TransferDao {
     }
 
     @Override
-    public List<Transfer> getAccountTransfers(int accountId) {
+    public List<Transfer> getAccountTransfers(int userFromId) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "select * from transfers " +
-                "join account_transfers using (transfer_id) where account_id = ? " +
+                "where user_from_id = ? " +
                 "order by transfer_id;";
 
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userFromId);
 
             while (results.next()) {
                 Transfer transfer = mapToTransfer(results);
@@ -90,8 +90,6 @@ public class JdbcTransferDao implements TransferDao {
         Transfer updatedTransfer = getTransferById(transferId);
         String sql = "update transfers set user_from_id = ?, user_to_id = ?, " +
                 "amount_to_transfer = ?, status = ? where transfer_id = ?;";
-
-        //TODO: add status from transfer status DTO
 
         try {
             int rowsAffected = jdbcTemplate.update(sql, updatedTransfer.getUserFromId(), updatedTransfer.getUserToId(),
