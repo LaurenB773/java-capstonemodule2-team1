@@ -19,7 +19,7 @@ CREATE TABLE transfers (
     user_from_id int NOT NULL,
     user_to_id int NOT NULL,
     amount_to_transfer numeric(10,2) not null, 
-    is_successful boolean DEFAULT true, 
+    status varchar(50), 
     CONSTRAINT CHK_amount_gt_0 CHECK (amount_to_transfer > 0)
 );
 
