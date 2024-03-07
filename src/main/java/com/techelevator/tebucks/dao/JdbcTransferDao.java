@@ -23,7 +23,7 @@ public class JdbcTransferDao implements TransferDao {
     public List<Transfer> getAccountTransfers(int accountId) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "select * from transfers " +
-                "join account_transfers on (transfer_id) where account_id = ? " +
+                "join account_transfers using (transfer_id) where account_id = ? " +
                 "order by transfer_id;";
 
         try {
@@ -62,7 +62,7 @@ public class JdbcTransferDao implements TransferDao {
 
     @Override
     public Transfer createTransfer(Transfer transfer) {
-        Transfer newTransfer = new Transfer();
+        Transfer newTransfer;
         String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer, is_successful) " +
                 "values(?, ?, ?, ?) returning transfer_id;";
 

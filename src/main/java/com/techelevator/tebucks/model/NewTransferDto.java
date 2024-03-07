@@ -1,5 +1,7 @@
 package com.techelevator.tebucks.model;
 
+import java.text.DecimalFormat;
+
 public class NewTransferDto {
     /*
     {
