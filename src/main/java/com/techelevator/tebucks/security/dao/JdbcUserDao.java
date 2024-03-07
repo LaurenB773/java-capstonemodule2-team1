@@ -23,12 +23,12 @@ public class JdbcUserDao implements UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<User> getUserList() {
+    public List<User> getUserList(int id) {
         List<User> users = new ArrayList<>();
-        String sql = "select * from users order by user_id;";
+        String sql = "select * from users where user_id != ? order by user_id;";
 
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
             while (results.next()) {
                 User user = mapRowToUser(results);
                 users.add(user);
