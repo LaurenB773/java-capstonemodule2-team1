@@ -64,13 +64,13 @@ public class JdbcTransferDao implements TransferDao {
 
     @Override
     public Transfer createTransfer(NewTransferDto newTransfer) {
-        String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer) " +
-                "values(?, ?, ?) returning transfer_id;";
+        String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer, transfer_type) " +
+                "values(?, ?, ?, ?) returning transfer_id;";
 
         try {
             Integer transferId = jdbcTemplate.queryForObject(sql, Integer.class,
-                    newTransfer.getUserFrom(), newTransfer. getUserTo(),
-                    newTransfer.getAmount());
+                    newTransfer.getUserFrom(), newTransfer.getUserTo(),
+                    newTransfer.getAmount(), newTransfer.getTransferType());
 
             if (transferId == null) {
                 throw new DaoException("Could not create transfer.");
@@ -89,11 +89,11 @@ public class JdbcTransferDao implements TransferDao {
     public Transfer updateTransfer(TransferStatusUpdateDto transfer, int transferId) {
         Transfer updatedTransfer = getTransferById(transferId);
         String sql = "update transfers set user_from_id = ?, user_to_id = ?, " +
-                "amount_to_transfer = ?, status = ? where transfer_id = ?;";
+                "amount_to_transfer = ?, transfer_type = ?, status = ? where transfer_id = ?;";
 
         try {
             int rowsAffected = jdbcTemplate.update(sql, updatedTransfer.getUserFromId(), updatedTransfer.getUserToId(),
-                    updatedTransfer.getAmountToTransfer(), transfer.getTransferStatus());
+                    updatedTransfer.getAmountToTransfer(), updatedTransfer.getTransferType(), transfer.getTransferStatus());
 
             if (rowsAffected == 0) {
                 throw new DaoException("Zero rows affected, expected at least one.");
@@ -116,6 +116,7 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setUserFromId(results.getInt("user_from_id"));
         transfer.setUserToId(results.getInt("user_to_id"));
         transfer.setAmountToTransfer(results.getDouble("amount_to_transfer"));
+        transfer.setTransferType(results.getString("transfer_type"));
         return transfer;
     }
 

@@ -6,6 +6,7 @@ public class Transfer {
     private int userToId;
     private Double amountToTransfer;
     private String status;
+    private String transferType;
 
     public int getTransferId() {
         return transferId;
@@ -45,5 +46,13 @@ public class Transfer {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getTransferType() {
+        return transferType;
+    }
+
+    public void setTransferType(String transferType) {
+        this.transferType = transferType;
     }
 }

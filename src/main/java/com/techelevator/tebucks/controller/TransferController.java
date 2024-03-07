@@ -64,7 +64,17 @@ public class TransferController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/transfers")
     public Transfer createTransfer(@Valid @RequestBody NewTransferDto newTransfer) {
-        return transferDao.createTransfer(newTransfer);
+        Transfer createdTransfer = transferDao.createTransfer(newTransfer);
+        int fromUser = createdTransfer.getUserFromId();
+        int toUser = createdTransfer.getUserToId();
+        double amount = createdTransfer.getAmountToTransfer();
+
+        if (createdTransfer.getTransferType().equals("Send")) {
+            accountDao.updateBalanceSend(fromUser, toUser, amount);
+        } else if (createdTransfer.getTransferType().equals("Request")) {
+            accountDao.updateBalanceRequest(fromUser, toUser, amount);
+        }
+        return createdTransfer;
     }
 
     @PutMapping("/transfers/{id}/status")
