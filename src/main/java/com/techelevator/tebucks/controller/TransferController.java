@@ -81,7 +81,7 @@ public class TransferController {
     public Transfer updateTransfer(@Valid @RequestBody TransferStatusUpdateDto transferStatus,
                                    @PathVariable int id, Principal principal) {
         Transfer transferToUpdate = getTransferById(id);
-        
+
         if (id != transferToUpdate.getTransferId() && transferToUpdate.getTransferId() != 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Transfer ids are in conflict.");
         }
@@ -89,7 +89,7 @@ public class TransferController {
         transferToUpdate.setTransferId(id);
 
         User loggedInUser = getLoggedInUserByPrincipal(principal);
-        if (transferToUpdate.getUserFromId() != loggedInUser.getId()){
+        if (transferToUpdate.getUserFromId() != loggedInUser.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this account.");
         }
 
@@ -108,12 +108,11 @@ public class TransferController {
     @GetMapping("/users")
     public List<User> getUserList(Principal principal) {
         User loggedInUser = getLoggedInUserByPrincipal(principal);
-        List<User> users = userDao.getUserList();
+        int userId = loggedInUser.getId();
+        List<User> users = userDao.getUserList(userId);
 
-        for (User user : users) {
-            if (user == loggedInUser) {
-                users.remove(user);
-            }
+        if (users.isEmpty()) {
+            throw new DaoException("No users to display.");
         }
 
         return users;
