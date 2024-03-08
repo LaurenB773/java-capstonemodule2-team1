@@ -22,8 +22,10 @@ public class JdbcTransferDao implements TransferDao {
     private UserDao userDao;
     private AccountDao accountDao;
 
-    public JdbcTransferDao(JdbcTemplate jdbcTemplate) {
+    public JdbcTransferDao(JdbcTemplate jdbcTemplate, UserDao userDao, AccountDao accountDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userDao = userDao;
+        this.accountDao = accountDao;
     }
 
     @Override
@@ -85,6 +87,37 @@ public class JdbcTransferDao implements TransferDao {
             if (transferId == null) {
                 throw new DaoException("Could not create transfer.");
             }
+
+            if (type.equals("Request")) {
+                sql = "UPDATE transfers " +
+                        "SET status = 'Pending' " +
+                        "WHERE transfer_id = ?;";
+
+                int rowsAffected = jdbcTemplate.update(sql, transferId);
+
+                if (rowsAffected == 0) {
+                    throw new DaoException("Zero rows affected, expecting at least one.");
+                }
+            }
+            User fromUser = userDao.getUserById(userFrom);
+            User toUser = userDao.getUserById(userTo);
+
+            Account fromUserAccount = accountDao.getAccountBalance(fromUser.getId());
+            Account toUserAccount = accountDao.getAccountBalance(toUser.getId());
+
+
+            if (type.equals("Send") && (amount < 0 || amount > fromUserAccount.getBalance())) {
+                sql = "UPDATE transfers " +
+                        "SET status = 'Rejected' " +
+                        "WHERE transfer_id = ?;";
+
+                int rowsAffected = jdbcTemplate.update(sql, transferId);
+
+                if (rowsAffected == 0) {
+                    throw new DaoException("Zero rows affected, expecting at least one.");
+                }
+            }
+
             /*
             //TODO: implement logic for changing status
 
