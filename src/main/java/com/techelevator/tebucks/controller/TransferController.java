@@ -38,14 +38,14 @@ public class TransferController {
     }
 
     @GetMapping("/account/balance")
-    public Account getAccountBalance(Principal principal) {
+    public Account getAccount(Principal principal) {
         User loggedInUser = getLoggedInUserByPrincipal(principal);
         int userId = loggedInUser.getId();
         return accountDao.getAccount(userId);
     }
 
     @GetMapping("/account/transfers")
-    public List<Transfer> getAccountTransfer(Principal principal) {
+    public List<Transfer> getAccountTransfers(Principal principal) {
         User loggedInUser = getLoggedInUserByPrincipal(principal);
         int userId = loggedInUser.getId();
         return transferDao.getAccountTransfers(userId);
@@ -65,13 +65,16 @@ public class TransferController {
     @PostMapping("/transfers")
     public Transfer createTransfer(@Valid @RequestBody NewTransferDto newTransfer) {
         Transfer createdTransfer = transferDao.createTransfer(newTransfer);
-        int fromUser = createdTransfer.getUserFromId();
-        int toUser = createdTransfer.getUserToId();
-        double amount = createdTransfer.getAmountToTransfer();
+        User fromUser = createdTransfer.getUserFrom();
+        int fromUserId = fromUser.getId();
+        User toUser = createdTransfer.getUserTo();
+        int toUserId = toUser.getId();
+        double amount = createdTransfer.getAmount();
 
         if (createdTransfer.getTransferType().equals("Send")) {
-            accountDao.updateBalance(fromUser, toUser, amount);
-        } 
+            accountDao.updateBalance(fromUserId, toUserId, amount);
+        }
+
         return createdTransfer;
     }
 
@@ -87,13 +90,18 @@ public class TransferController {
         transferToUpdate.setTransferId(id);
 
         User loggedInUser = getLoggedInUserByPrincipal(principal);
-        if (transferToUpdate.getUserFromId() != loggedInUser.getId()) {
+        User transferUser = transferToUpdate.getUserFrom();
+        int idTransferUserFrom = transferUser.getId();
+        User transferToUser = transferToUpdate.getUserTo();
+        int idTransferUserTo = transferToUser.getId();
+
+        if (idTransferUserFrom != loggedInUser.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this account.");
         }
 
         try {
             if (transferStatusUpdateDto.getTransferStatus().equals("Approved")) {
-                accountDao.updateBalance(transferToUpdate.getUserFromId(), transferToUpdate.getUserToId(), transferToUpdate.getAmountToTransfer());
+                accountDao.updateBalance(idTransferUserFrom, idTransferUserTo, transferToUpdate.getAmount());
             } else if (transferStatusUpdateDto.getTransferStatus().equals("Rejected")) {
                 throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
             }

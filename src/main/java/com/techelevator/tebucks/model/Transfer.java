@@ -1,12 +1,14 @@
 package com.techelevator.tebucks.model;
 
+import com.techelevator.tebucks.security.model.User;
+
 public class Transfer {
     private int transferId;
-    private int userFromId;
-    private int userToId;
-    private Double amountToTransfer;
-    private String status;
     private String transferType;
+    private String transferStatus;
+    private User userFrom;
+    private User userTo;
+    private Double amount;
 
     public int getTransferId() {
         return transferId;
@@ -16,36 +18,36 @@ public class Transfer {
         this.transferId = transferId;
     }
 
-    public int getUserFromId() {
-        return userFromId;
+    public User getUserFrom() {
+        return userFrom;
     }
 
-    public void setUserFromId(int userFromId) {
-        this.userFromId = userFromId;
+    public void setUserFrom(User userFrom) {
+        this.userFrom = userFrom;
     }
 
-    public int getUserToId() {
-        return userToId;
+    public User getUserTo() {
+        return userTo;
     }
 
-    public void setUserToId(int userToId) {
-        this.userToId = userToId;
+    public void setUserTo(User userTo) {
+        this.userTo = userTo;
     }
 
-    public Double getAmountToTransfer() {
-        return amountToTransfer;
+    public Double getAmount() {
+        return amount;
     }
 
-    public void setAmountToTransfer(Double amountToTransfer) {
-        this.amountToTransfer = amountToTransfer;
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 
-    public String getStatus() {
-        return status;
+    public String getTransferStatus() {
+        return transferStatus;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setTransferStatus(String transferStatus) {
+        this.transferStatus = transferStatus;
     }
 
     public String getTransferType() {
