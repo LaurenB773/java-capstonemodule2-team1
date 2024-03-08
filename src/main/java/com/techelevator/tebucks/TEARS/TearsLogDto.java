@@ -1,8 +1,12 @@
 package com.techelevator.tebucks.TEARS;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TearsLogDto {
     private String description;
+    @JsonProperty("username_from")
     private String username_from;
+    @JsonProperty("username_to")
     private String username_to;
     private double amount;
 

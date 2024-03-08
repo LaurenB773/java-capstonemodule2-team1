@@ -1,5 +1,8 @@
 package com.techelevator.tebucks.dao;
 
+import com.techelevator.tebucks.TEARS.TearsLogDto;
+import com.techelevator.tebucks.TEARS.TearsService;
+import com.techelevator.tebucks.TEARS.TearsTokenDto;
 import com.techelevator.tebucks.exception.DaoException;
 import com.techelevator.tebucks.model.Account;
 import com.techelevator.tebucks.model.NewTransferDto;
@@ -12,6 +15,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +25,8 @@ public class JdbcTransferDao implements TransferDao {
     private JdbcTemplate jdbcTemplate;
     private UserDao userDao;
     private AccountDao accountDao;
+    private TearsService tearsService = new TearsService();
+
 
     public JdbcTransferDao(JdbcTemplate jdbcTemplate, UserDao userDao, AccountDao accountDao) {
         this.jdbcTemplate = jdbcTemplate;
@@ -68,7 +74,6 @@ public class JdbcTransferDao implements TransferDao {
         return null;
     }
 
-
     @Override
     public Transfer createTransfer(NewTransferDto newTransfer) {
         String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer, transfer_type) " +
@@ -105,6 +110,10 @@ public class JdbcTransferDao implements TransferDao {
             Account fromUserAccount = accountDao.getAccount(fromUser.getId());
             Account toUserAccount = accountDao.getAccount(toUser.getId());
 
+            TearsLogDto logDto = new TearsLogDto();
+            logDto.setUsername_from(fromUser.getUsername());
+            logDto.setUsername_to(toUser.getUsername());
+            logDto.setAmount(amount);
 
             if (type.equals("Send") && (amount < 0 || amount > fromUserAccount.getBalance())) {
                 sql = "UPDATE transfers " +
@@ -116,6 +125,16 @@ public class JdbcTransferDao implements TransferDao {
                 if (rowsAffected == 0) {
                     throw new DaoException("Zero rows affected, expecting at least one.");
                 }
+                logDto.setDescription("Not a valid amount to send");
+                tearsService.addLog(logDto);
+            }
+
+            if (amount > 1000) {
+                logDto.setUsername_from(fromUser.getUsername());
+                logDto.setUsername_to(toUser.getUsername());
+                logDto.setAmount(amount);
+                logDto.setDescription("over $1000");
+                tearsService.addLog(logDto);
             }
 
             return getTransferById(transferId);
@@ -144,6 +163,10 @@ public class JdbcTransferDao implements TransferDao {
 
             updatedTransfer = getTransferById(updatedTransfer.getTransferId());
 
+            if (updatedTransfer.getTransferStatus().equals("Rejected")) {
+//                tearsLog(); //TODO:
+            }
+
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
         } catch (DataIntegrityViolationException e) {
@@ -167,5 +190,14 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setTransferType(results.getString("transfer_type"));
         return transfer;
     }
+
+//    private static void tearsLog() {
+//        TearsService tearsService = new TearsService(new RestTemplate());
+//        TearsLogDto logDto = new TearsLogDto();
+//        logDto.setDescription("overdraft");
+//
+//
+//        tearsService.addLog(logDto);
+//    }
 
 }
