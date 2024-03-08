@@ -130,16 +130,17 @@ public class JdbcTransferDao implements TransferDao {
     @Override
     public Transfer updateTransfer(TransferStatusUpdateDto transfer, int transferId) {
         Transfer updatedTransfer = getTransferById(transferId);
-        String sql = "update transfers set user_from_id = ?, user_to_id = ?, " +
-                "amount_to_transfer = ?, transfer_type = ?, status = ? where transfer_id = ?;";
+        String sql = "update transfers set status = ? where transfer_id = ?;";
 
         try {
-            int rowsAffected = jdbcTemplate.update(sql, updatedTransfer.getUserFrom(), updatedTransfer.getUserTo(),
-                    updatedTransfer.getAmount(), updatedTransfer.getTransferType(), transfer.getTransferStatus());
+            int rowsAffected = jdbcTemplate.update(sql, transfer.getTransferStatus(), transferId);
 
             if (rowsAffected == 0) {
                 throw new DaoException("Zero rows affected, expected at least one.");
             }
+
+            accountDao.updateBalance(updatedTransfer.getUserFrom().getId(),
+                    updatedTransfer.getUserTo().getId(), updatedTransfer.getAmount());
 
             updatedTransfer = getTransferById(updatedTransfer.getTransferId());
 
