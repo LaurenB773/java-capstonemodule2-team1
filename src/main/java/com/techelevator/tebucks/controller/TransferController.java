@@ -41,7 +41,7 @@ public class TransferController {
     public Account getAccountBalance(Principal principal) {
         User loggedInUser = getLoggedInUserByPrincipal(principal);
         int userId = loggedInUser.getId();
-        return accountDao.getAccountBalance(userId);
+        return accountDao.getAccount(userId);
     }
 
     @GetMapping("/account/transfers")
@@ -70,7 +70,7 @@ public class TransferController {
         double amount = createdTransfer.getAmountToTransfer();
 
         if (createdTransfer.getTransferType().equals("Send")) {
-            accountDao.updateBalanceSend(fromUser, toUser, amount);
+            accountDao.updateBalance(fromUser, toUser, amount);
         } 
         return createdTransfer;
     }
@@ -93,10 +93,9 @@ public class TransferController {
 
         try {
             if (transferStatusUpdateDto.getTransferStatus().equals("Approved")) {
-                accountDao.updateBalanceRequest(transferToUpdate.getUserFromId(), transferToUpdate.getUserToId(), transferToUpdate.getAmountToTransfer());
+                accountDao.updateBalance(transferToUpdate.getUserFromId(), transferToUpdate.getUserToId(), transferToUpdate.getAmountToTransfer());
             } else if (transferStatusUpdateDto.getTransferStatus().equals("Rejected")) {
                 throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
-
             }
             return transferDao.updateTransfer(transferStatus, id);
         } catch (DaoException e) {
