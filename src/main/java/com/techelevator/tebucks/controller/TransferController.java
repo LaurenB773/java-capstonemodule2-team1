@@ -99,16 +99,16 @@ public class TransferController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this account.");
         }
 
-        try {
-            if (transferStatusUpdateDto.getTransferStatus().equals("Approved")) {
-                accountDao.updateBalance(idTransferUserFrom, idTransferUserTo, transferToUpdate.getAmount());
-            } else if (transferStatusUpdateDto.getTransferStatus().equals("Rejected")) {
-                throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
-            }
+//        try {
+//            if (transferStatus.getTransferStatus().equals("Approved")) {
+//                accountDao.updateBalance(idTransferUserFrom, idTransferUserTo, transferToUpdate.getAmount());
+//            } else if (transferStatus.getTransferStatus().equals("Rejected")) {
+//                throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
+//            }
             return transferDao.updateTransfer(transferStatus, id);
-        } catch (DaoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found.");
-        }
+//        } catch (DaoException e) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found.");
+//        }
     }
 
     private User getLoggedInUserByPrincipal(Principal principal) {
