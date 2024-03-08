@@ -90,7 +90,7 @@ public class JdbcTransferDao implements TransferDao {
 
             set status and change in SQL queries
 
-            if amount > user from balance & amount > 0 = approved
+            if amount > user from balance & 1000 > amount > 0 = approved
             if transfer type is request = pending
             if amount < user from balance or amount < 0 = rejected
              */
