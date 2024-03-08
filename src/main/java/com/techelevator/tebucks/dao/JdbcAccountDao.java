@@ -19,16 +19,16 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public Account getAccountBalance(int id) {
-        Account accountBalance = new Account();
+    public Account getAccount(int id) {
+        Account account = new Account();
         String sql = "select * from accounts where user_id = ?;";
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
             if (results.next()) {
-                accountBalance.setAccountId(results.getInt("account_id"));
-                accountBalance.setUserId(results.getInt("user_id"));
-                accountBalance.setBalance(results.getDouble("balance"));
-                return accountBalance;
+                account.setAccountId(results.getInt("account_id"));
+                account.setUserId(results.getInt("user_id"));
+                account.setBalance(results.getDouble("balance"));
+                return account;
             }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database", e);
@@ -36,7 +36,7 @@ public class JdbcAccountDao implements AccountDao {
         return null;
     }
 
-    public void updateBalanceSend(int fromUserId, int toUserId, double amount) {
+    public void updateBalance(int fromUserId, int toUserId, double amount) {
 
         String sql = "start transaction; " +
                 "update accounts set balance = (balance - ?) " +
@@ -47,24 +47,6 @@ public class JdbcAccountDao implements AccountDao {
         try {
             int rowsAffected = jdbcTemplate.update(sql, amount, fromUserId, amount, toUserId);
 
-
-        } catch (CannotGetJdbcConnectionException e) {
-            throw new DaoException("Could not connect.", e);
-        } catch (DataIntegrityViolationException e) {
-            throw new DaoException("Data integrity violation", e);
-        }
-    }
-
-    public void updateBalanceRequest(int fromUserId, int toUserId, double amount) {
-
-        String sql = "start transaction; " +
-                "update accounts set balance = (balance + ?) " +
-                "where user_id = ?; " +
-                "update accounts set balance = (balance - ?) " +
-                "where user_id = ?; " +
-                "commit;";
-        try {
-            jdbcTemplate.update(sql, amount, toUserId, amount, fromUserId);
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);

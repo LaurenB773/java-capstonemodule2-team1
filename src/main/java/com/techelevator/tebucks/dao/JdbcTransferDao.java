@@ -102,8 +102,8 @@ public class JdbcTransferDao implements TransferDao {
             User fromUser = userDao.getUserById(userFrom);
             User toUser = userDao.getUserById(userTo);
 
-            Account fromUserAccount = accountDao.getAccountBalance(fromUser.getId());
-            Account toUserAccount = accountDao.getAccountBalance(toUser.getId());
+            Account fromUserAccount = accountDao.getAccount(fromUser.getId());
+            Account toUserAccount = accountDao.getAccount(toUser.getId());
 
 
             if (type.equals("Send") && (amount < 0 || amount > fromUserAccount.getBalance())) {
@@ -117,16 +117,6 @@ public class JdbcTransferDao implements TransferDao {
                     throw new DaoException("Zero rows affected, expecting at least one.");
                 }
             }
-
-            /*
-            //TODO: implement logic for changing status
-
-            set status and change in SQL queries
-
-            if amount > user from balance & 1000 > amount > 0 = approved
-            if transfer type is request = pending
-            if amount < user from balance or amount < 0 = rejected
-             */
 
             return getTransferById(transferId);
         } catch (CannotGetJdbcConnectionException e) {
