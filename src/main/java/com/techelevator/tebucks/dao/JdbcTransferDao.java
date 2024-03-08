@@ -134,8 +134,8 @@ public class JdbcTransferDao implements TransferDao {
                 "amount_to_transfer = ?, transfer_type = ?, status = ? where transfer_id = ?;";
 
         try {
-            int rowsAffected = jdbcTemplate.update(sql, updatedTransfer.getUserFromId(), updatedTransfer.getUserToId(),
-                    updatedTransfer.getAmountToTransfer(), updatedTransfer.getTransferType(), transfer.getTransferStatus());
+            int rowsAffected = jdbcTemplate.update(sql, updatedTransfer.getUserFrom(), updatedTransfer.getUserTo(),
+                    updatedTransfer.getAmount(), updatedTransfer.getTransferType(), transfer.getTransferStatus());
 
             if (rowsAffected == 0) {
                 throw new DaoException("Zero rows affected, expected at least one.");
@@ -152,13 +152,17 @@ public class JdbcTransferDao implements TransferDao {
         return updatedTransfer;
     }
 
-    private static Transfer mapToTransfer(SqlRowSet results) {
+    private Transfer mapToTransfer(SqlRowSet results) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(results.getInt("transfer_id"));
-        transfer.setUserFromId(results.getInt("user_from_id"));
-        transfer.setUserToId(results.getInt("user_to_id"));
-        transfer.setAmountToTransfer(results.getDouble("amount_to_transfer"));
-        transfer.setStatus(results.getString("status"));
+        int userFrom = results.getInt("user_from_id");
+        User fromUser = userDao.getUserById(userFrom);
+        transfer.setUserFrom(fromUser);
+        int userTo = results.getInt("user_to_id");
+        User toUser = userDao.getUserById(userTo);
+        transfer.setUserTo(toUser);
+        transfer.setAmount(results.getDouble("amount_to_transfer"));
+        transfer.setTransferStatus(results.getString("status"));
         transfer.setTransferType(results.getString("transfer_type"));
         return transfer;
     }

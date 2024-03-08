@@ -3,12 +3,10 @@ package com.techelevator.tebucks.dao;
 import com.techelevator.tebucks.exception.DaoException;
 import com.techelevator.tebucks.model.Account;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class JdbcAccountDao implements AccountDao {
