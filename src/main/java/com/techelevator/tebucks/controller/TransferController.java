@@ -71,13 +71,7 @@ public class TransferController {
 
         if (createdTransfer.getTransferType().equals("Send")) {
             accountDao.updateBalanceSend(fromUser, toUser, amount);
-        } else if (createdTransfer.getTransferType().equals("Request")) {
-            if (transferStatusUpdateDto.getTransferStatus().equals("Approved")) {
-                accountDao.updateBalanceRequest(fromUser, toUser, amount);
-            } else if (transferStatusUpdateDto.getTransferStatus().equals("Rejected")) {
-                throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
-            }
-        }
+        } 
         return createdTransfer;
     }
 
@@ -98,6 +92,12 @@ public class TransferController {
         }
 
         try {
+            if (transferStatusUpdateDto.getTransferStatus().equals("Approved")) {
+                accountDao.updateBalanceRequest(transferToUpdate.getUserFromId(), transferToUpdate.getUserToId(), transferToUpdate.getAmountToTransfer());
+            } else if (transferStatusUpdateDto.getTransferStatus().equals("Rejected")) {
+                throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
+
+            }
             return transferDao.updateTransfer(transferStatus, id);
         } catch (DaoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found.");
