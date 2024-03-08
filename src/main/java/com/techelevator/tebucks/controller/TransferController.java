@@ -34,7 +34,7 @@ public class TransferController {
         this.accountDao = accountDao;
         this.userDao = userDao;
         this.newTransferDto = newTransferDto;
-        this.transferDao = transferDao;
+        this.transferStatusUpdateDto = transferStatusUpdateDto;
     }
 
     @GetMapping("/account/balance")
