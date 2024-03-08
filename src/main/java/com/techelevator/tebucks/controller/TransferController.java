@@ -1,5 +1,6 @@
 package com.techelevator.tebucks.controller;
 
+import com.techelevator.tebucks.TEARS.TearsService;
 import com.techelevator.tebucks.dao.AccountDao;
 import com.techelevator.tebucks.dao.TransferDao;
 import com.techelevator.tebucks.exception.DaoException;
@@ -27,7 +28,6 @@ public class TransferController {
     private UserDao userDao;
     private NewTransferDto newTransferDto;
     private TransferStatusUpdateDto transferStatusUpdateDto;
-
     public TransferController(TransferDao transferDao, AccountDao accountDao, UserDao userDao,
                               NewTransferDto newTransferDto, TransferStatusUpdateDto transferStatusUpdateDto) {
         this.transferDao = transferDao;
@@ -71,7 +71,9 @@ public class TransferController {
         int toUserId = toUser.getId();
         double amount = createdTransfer.getAmount();
 
-        if (createdTransfer.getTransferType().equals("Send")) {
+        Account account = accountDao.getAccount(fromUserId);
+        if (createdTransfer.getTransferType().equals("Send") && createdTransfer.getAmount() > 0
+        && createdTransfer.getAmount() < account.getBalance()) {
             accountDao.updateBalance(fromUserId, toUserId, amount);
         }
 
@@ -99,16 +101,7 @@ public class TransferController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this account.");
         }
 
-//        try {
-//            if (transferStatus.getTransferStatus().equals("Approved")) {
-//                accountDao.updateBalance(idTransferUserFrom, idTransferUserTo, transferToUpdate.getAmount());
-//            } else if (transferStatus.getTransferStatus().equals("Rejected")) {
-//                throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, "Request rejected.");
-//            }
-            return transferDao.updateTransfer(transferStatus, id);
-//        } catch (DaoException e) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found.");
-//        }
+        return transferDao.updateTransfer(transferStatus, id);
     }
 
     private User getLoggedInUserByPrincipal(Principal principal) {

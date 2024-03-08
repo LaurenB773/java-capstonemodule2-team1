@@ -29,7 +29,6 @@ CREATE TABLE accounts (
     user_id int NOT NULL,
     balance numeric (10,2),
     CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (user_id),
-    CONSTRAINT CHK_balance_not_negative CHECK (balance >= 0)
 );
 
 CREATE TABLE account_transfers(
