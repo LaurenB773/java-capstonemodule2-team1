@@ -1,6 +1,6 @@
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS users, transfers, accounts, account_transfers;
+DROP TABLE IF EXISTS users, transfers, accounts;
 
 CREATE TABLE users (
     user_id serial NOT NULL,
@@ -42,19 +42,15 @@ INSERT INTO users (username,password_hash,role) VALUES ('user2','user2','ROLE_US
 INSERT INTO users (username,password_hash,role) VALUES ('user3','user3','ROLE_USER'); -- 3
 
 INSERT INTO transfers (transfer_id, user_from_id, user_to_id, amount_to_transfer, transfer_type)
-                       VALUES(1, 1, 2, 20.0, 'Send');
+                       VALUES(1, 1, 2, 20, 'Send');
 INSERT INTO transfers (transfer_id, user_from_id, user_to_id, amount_to_transfer, transfer_type)
-                       VALUES(2, 3, 1, 1000.0, 'Request');
+                       VALUES(2, 3, 4, 1000, 'Request');
 INSERT INTO transfers (transfer_id, user_from_id, user_to_id, amount_to_transfer, transfer_type)
-                       VALUES(3, 2, 1, 100.0, 'Send');
+                       VALUES(3, 4, 5, 500, 'Send');
 
 INSERT INTO accounts (account_id, user_id, balance) VALUES (1, 1, 1000);
 INSERT INTO accounts (account_id, user_id, balance) VALUES (2, 2, 500);
 INSERT INTO accounts (account_id, user_id, balance) VALUES (3, 3, 1500);
-
-INSERT INTO account_transfers (account_id, transfer_id) VALUES (1, 1);
-INSERT INTO account_transfers (account_id, transfer_id) VALUES (2, 2);
-INSERT INTO account_transfers (account_id, transfer_id) VALUES (3, 3);
 
 
 COMMIT TRANSACTION;
