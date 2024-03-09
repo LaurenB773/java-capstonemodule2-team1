@@ -1,5 +1,6 @@
 package com.techelevator.tebucks.dao;
 
+import com.techelevator.tebucks.model.Transfer;
 import com.techelevator.tebucks.security.dao.JdbcUserDao;
 import com.techelevator.tebucks.security.dao.UserDao;
 import org.junit.Before;
@@ -7,6 +8,7 @@ import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class JdbcTransferDaoTests extends BaseDaoTests {
+//    public static final Transfer TRANSFER_1 = ();
 
     //TODO: testing for getAccountTransfers, getTransferById, createTransfer, updateTransfer
 
