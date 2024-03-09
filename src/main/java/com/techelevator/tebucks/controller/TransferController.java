@@ -1,6 +1,5 @@
 package com.techelevator.tebucks.controller;
 
-import com.techelevator.tebucks.TEARS.TearsService;
 import com.techelevator.tebucks.dao.AccountDao;
 import com.techelevator.tebucks.dao.TransferDao;
 import com.techelevator.tebucks.exception.DaoException;
@@ -28,6 +27,7 @@ public class TransferController {
     private UserDao userDao;
     private NewTransferDto newTransferDto;
     private TransferStatusUpdateDto transferStatusUpdateDto;
+
     public TransferController(TransferDao transferDao, AccountDao accountDao, UserDao userDao,
                               NewTransferDto newTransferDto, TransferStatusUpdateDto transferStatusUpdateDto) {
         this.transferDao = transferDao;
@@ -72,8 +72,13 @@ public class TransferController {
         double amount = createdTransfer.getAmount();
 
         Account account = accountDao.getAccount(fromUserId);
-        if (createdTransfer.getTransferType().equals("Send") && createdTransfer.getAmount() > 0
-        && createdTransfer.getAmount() < account.getBalance()) {
+
+        if (createdTransfer.getTransferType().equals("Send") && amount > account.getBalance()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sent more money than in balance");
+        }
+
+        if (createdTransfer.getTransferType().equals("Send") && amount > 0
+                && amount < account.getBalance()) {
             accountDao.updateBalance(fromUserId, toUserId, amount);
         }
 
@@ -92,12 +97,12 @@ public class TransferController {
         transferToUpdate.setTransferId(id);
 
         User loggedInUser = getLoggedInUserByPrincipal(principal);
-        User transferUser = transferToUpdate.getUserFrom();
-        int idTransferUserFrom = transferUser.getId();
-        User transferToUser = transferToUpdate.getUserTo();
-        int idTransferUserTo = transferToUser.getId();
+        User fromUser = transferToUpdate.getUserFrom();
+        int fromUserId = fromUser.getId();
+        User toUser = transferToUpdate.getUserTo();
+        int toUserId = toUser.getId();
 
-        if (idTransferUserFrom != loggedInUser.getId()) {
+        if (fromUserId != loggedInUser.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have access to this account.");
         }
 
