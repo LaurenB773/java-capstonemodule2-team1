@@ -1,6 +1,6 @@
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS users, transfers, accounts, account_transfers;
+DROP TABLE IF EXISTS users, transfers, accounts;
 
 CREATE TABLE users (
     user_id serial NOT NULL,
@@ -28,15 +28,8 @@ CREATE TABLE accounts (
     account_id serial PRIMARY KEY,
     user_id int NOT NULL,
     balance numeric (10,2),
-    CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (user_id),
+    CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
-
-CREATE TABLE account_transfers(
-	account_id int REFERENCES accounts (account_id) NOT NULL,
-	transfer_id int REFERENCES transfers (transfer_id) NOT NULL,
-	CONSTRAINT pk_account_transfer PRIMARY KEY (account_id, transfer_id)
-);
-
 
 
 COMMIT TRANSACTION;
