@@ -10,6 +10,17 @@ public class Transfer {
     private User userTo;
     private Double amount;
 
+    public Transfer() {
+    }
+
+    public Transfer(int transferId, User userFrom, User userTo, Double amount, String transferType) {
+        this.transferId = transferId;
+        this.transferType = transferType;
+        this.userFrom = userFrom;
+        this.userTo = userTo;
+        this.amount = amount;
+    }
+
     public int getTransferId() {
         return transferId;
     }
