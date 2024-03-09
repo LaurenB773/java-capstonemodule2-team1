@@ -2,7 +2,6 @@ package com.techelevator.tebucks.dao;
 
 import com.techelevator.tebucks.TEARS.TearsLogDto;
 import com.techelevator.tebucks.TEARS.TearsService;
-import com.techelevator.tebucks.TEARS.TearsTokenDto;
 import com.techelevator.tebucks.exception.DaoException;
 import com.techelevator.tebucks.model.Account;
 import com.techelevator.tebucks.model.NewTransferDto;
@@ -15,7 +14,6 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;

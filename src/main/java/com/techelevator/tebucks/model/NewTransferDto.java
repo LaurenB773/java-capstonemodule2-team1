@@ -1,7 +1,6 @@
 package com.techelevator.tebucks.model;
 
 import org.springframework.stereotype.Component;
-
 import javax.validation.constraints.AssertTrue;
 import java.util.Objects;
 

@@ -1,6 +1,5 @@
 package com.techelevator.tebucks.controller;
 
-import com.techelevator.tebucks.TEARS.TearsService;
 import com.techelevator.tebucks.dao.AccountDao;
 import com.techelevator.tebucks.dao.TransferDao;
 import com.techelevator.tebucks.exception.DaoException;
@@ -73,11 +72,14 @@ public class TransferController {
         double amount = createdTransfer.getAmount();
 
         Account account = accountDao.getAccount(fromUserId);
+
+        if (createdTransfer.getTransferType().equals("Send") && amount > account.getBalance()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sent more money than in balance");
+        }
+
         if (createdTransfer.getTransferType().equals("Send") && amount > 0
                 && amount < account.getBalance()) {
             accountDao.updateBalance(fromUserId, toUserId, amount);
-        } else {
-            createdTransfer.setTransferType("Rejected");
         }
 
         return createdTransfer;
