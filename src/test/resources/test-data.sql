@@ -44,9 +44,9 @@ INSERT INTO users (username,password_hash,role) VALUES ('user3','user3','ROLE_US
 INSERT INTO transfers (transfer_id, user_from_id, user_to_id, amount_to_transfer, transfer_type)
                        VALUES(1, 1, 2, 20, 'Send');
 INSERT INTO transfers (transfer_id, user_from_id, user_to_id, amount_to_transfer, transfer_type)
-                       VALUES(2, 3, 4, 1000, 'Request');
+                       VALUES(2, 2, 3, 1000, 'Request');
 INSERT INTO transfers (transfer_id, user_from_id, user_to_id, amount_to_transfer, transfer_type)
-                       VALUES(3, 4, 5, 500, 'Send');
+                       VALUES(3, 2, 1, 100, 'Send');
 
 INSERT INTO accounts (account_id, user_id, balance) VALUES (1, 1, 1000);
 INSERT INTO accounts (account_id, user_id, balance) VALUES (2, 2, 500);
