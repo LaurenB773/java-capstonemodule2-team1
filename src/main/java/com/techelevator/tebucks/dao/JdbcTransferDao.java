@@ -86,8 +86,7 @@ public class JdbcTransferDao implements TransferDao {
 
         try {
             Integer transferId = jdbcTemplate.queryForObject(sql, Integer.class,
-                    newTransfer.getUserFrom(), newTransfer.getUserTo(),
-                    newTransfer.getAmount(), newTransfer.getTransferType());
+                    userFrom, userTo, amount, type);
 
             if (transferId == null) {
                 throw new DaoException("Could not create transfer.");
@@ -104,6 +103,7 @@ public class JdbcTransferDao implements TransferDao {
                     throw new DaoException("Zero rows affected, expecting at least one.");
                 }
             }
+
             User fromUser = userDao.getUserById(userFrom);
             User toUser = userDao.getUserById(userTo);
 
@@ -125,19 +125,21 @@ public class JdbcTransferDao implements TransferDao {
                 if (rowsAffected == 0) {
                     throw new DaoException("Zero rows affected, expecting at least one.");
                 }
+
                 logDto.setDescription("Not a valid amount to send");
                 tearsService.addLog(logDto);
             }
 
-            if (amount > 1000) {
+            if (type.equals("Send") && amount >= 1000) {
                 logDto.setUsername_from(fromUser.getUsername());
                 logDto.setUsername_to(toUser.getUsername());
                 logDto.setAmount(amount);
-                logDto.setDescription("over $1000");
+                logDto.setDescription("Sent $1000 or more");
                 tearsService.addLog(logDto);
             }
 
             return getTransferById(transferId);
+
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
         } catch (DataIntegrityViolationException e) {
@@ -164,7 +166,16 @@ public class JdbcTransferDao implements TransferDao {
             updatedTransfer = getTransferById(updatedTransfer.getTransferId());
 
             if (updatedTransfer.getTransferStatus().equals("Rejected")) {
-//                tearsLog(); //TODO:
+                User fromUser = updatedTransfer.getUserFrom();
+                User toUser = updatedTransfer.getUserTo();
+                double amount = updatedTransfer.getAmount();
+
+                TearsLogDto logDto = new TearsLogDto();
+                logDto.setUsername_from(fromUser.getUsername());
+                logDto.setUsername_to(toUser.getUsername());
+                logDto.setAmount(amount);
+                logDto.setDescription("Status = rejected");
+                tearsService.addLog(logDto);
             }
 
         } catch (CannotGetJdbcConnectionException e) {
@@ -190,14 +201,5 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setTransferType(results.getString("transfer_type"));
         return transfer;
     }
-
-//    private static void tearsLog() {
-//        TearsService tearsService = new TearsService(new RestTemplate());
-//        TearsLogDto logDto = new TearsLogDto();
-//        logDto.setDescription("overdraft");
-//
-//
-//        tearsService.addLog(logDto);
-//    }
 
 }

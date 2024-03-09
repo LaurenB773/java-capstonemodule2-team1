@@ -5,10 +5,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
 public class TearsService {
     private static final String API_BASE_URL = "https://tears.azurewebsites.net/";
     private RestTemplate restTemplate = new RestTemplate();
@@ -41,7 +38,6 @@ public class TearsService {
         headers.setBearerAuth(login());
         HttpEntity<TearsLogDto> entity = new HttpEntity<>(tearsLog, headers);
 
-        TearsLogDto returnedTears = null;
         try {
            restTemplate.postForObject(API_BASE_URL + "api/TxLog", entity, TearsLogDto.class);
         } catch (RestClientResponseException | ResourceAccessException e) {
