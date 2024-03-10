@@ -7,9 +7,6 @@ import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class JdbcAccountDaoTests extends BaseDaoTests {
-
-    //TODO: test updateBalance
-
     private static final Account ACCOUNT_1 = new Account(1, 1, 1000.00);
     private static final Account ACCOUNT_2 = new Account(2, 2, 500.00);
 
@@ -34,11 +31,6 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
     public void getAccount_returns_null_with_invalid_id() {
         Account account = sut.getAccount(-1);
         Assert.assertNull(account);
-    }
-
-    @Test
-    public void updateBalance_exchanges_correct_amount() {
-
     }
 
     private void asserAccountsMatch(Account expected, Account actual) {
