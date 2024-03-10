@@ -9,6 +9,15 @@ public class Account {
     @Min(0)
     private Double balance;
 
+    public Account() {
+    }
+
+    public Account(int accountId, int userId, Double balance) {
+        this.accountId = accountId;
+        this.userId = userId;
+        this.balance = balance;
+    }
+
     public int getAccountId() {
         return accountId;
     }
