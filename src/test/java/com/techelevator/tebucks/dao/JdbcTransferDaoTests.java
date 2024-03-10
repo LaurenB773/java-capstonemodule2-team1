@@ -34,6 +34,7 @@ public class JdbcTransferDaoTests extends BaseDaoTests {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         JdbcUserDao userDao = new JdbcUserDao(jdbcTemplate);
         JdbcAccountDao accountDao = new JdbcAccountDao(jdbcTemplate);
+        sut = new JdbcTransferDao(jdbcTemplate, userDao, accountDao);
     }
     @Test
     public void getAccountTransfers_returns_a_transfer_given_valid_id(){
@@ -71,19 +72,20 @@ public class JdbcTransferDaoTests extends BaseDaoTests {
     }
     @Test
     public void updateTransfer_updates_a_transfer(){
-        TransferStatusUpdateDto retrievedTransfer  = new TransferStatusUpdateDto();
+        TransferStatusUpdateDto updateDto = new TransferStatusUpdateDto();
+        Transfer transfer = sut.getTransferById(1);
+        updateDto.setTransferStatus("Pending");
 
-//        retrievedTransfer.setAmount(retrievedTransfer.getAmount() - 100);
-//
-//        Transfer updatedTransfer = sut.updateTransfer(retrievedTransfer);
-//        Assert.assertNotNull(updatedPark);
-//
-//        retrievedPark = sut.getParkById(1);
-//        assertParksMatch(updatedPark, retrievedPark);
+        Assert.assertNotNull(transfer);
+        double originalAmount = transfer.getAmount();
 
-//        idk what I'm doing :(((((((
+        Transfer updatedTransfer = sut.updateTransfer(updateDto, transfer.getTransferId());
 
+        Assert.assertNotNull(updatedTransfer);
 
+        transfer.setAmount(originalAmount - 100);
+
+        assertTransfersMatch(updatedTransfer, transfer);
     }
     private static void assertTransfersMatch(Transfer expected, Transfer actual) {
         Assert.assertEquals(expected.getTransferId(), actual.getTransferId());
