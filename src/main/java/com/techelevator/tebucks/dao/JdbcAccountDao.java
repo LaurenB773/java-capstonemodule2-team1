@@ -7,6 +7,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class JdbcAccountDao implements AccountDao {
@@ -45,6 +46,9 @@ public class JdbcAccountDao implements AccountDao {
         try {
             int rowsAffected = jdbcTemplate.update(sql, amount, fromUserId, amount, toUserId);
 
+            if (rowsAffected != 2) {
+                throw new DaoException("Unexpected amount of rows expected. Expecting two rows.");
+            }
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
