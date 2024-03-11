@@ -21,10 +21,10 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
     @Test
     public void getAccount_returns_correct_account_with_valid_id() {
         Account account1 = sut.getAccount(1);
-        asserAccountsMatch(ACCOUNT_1, account1);
+        assertAccountsMatch(ACCOUNT_1, account1);
 
         Account account2 = sut.getAccount(2);
-        asserAccountsMatch(ACCOUNT_2, account2);
+        assertAccountsMatch(ACCOUNT_2, account2);
     }
 
     @Test
@@ -33,10 +33,11 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
         Assert.assertNull(account);
     }
 
-    private void asserAccountsMatch(Account expected, Account actual) {
-        Assert.assertEquals(expected.getAccountId(), actual.getAccountId());
-        Assert.assertEquals(expected.getUserId(), actual.getUserId());
-        Assert.assertEquals(expected.getBalance(), actual.getBalance());
+    private void assertAccountsMatch(Account expected, Account actual) {
+        Assert.assertEquals("Account IDs do not match", expected.getAccountId(), actual.getAccountId());
+        Assert.assertEquals("User IDs do not match", expected.getUserId(), actual.getUserId());
+        Assert.assertEquals("Balances do not match", expected.getBalance(), actual.getBalance(), 0.001); // Small delta value for floating-point comparison
     }
+
 
 }
