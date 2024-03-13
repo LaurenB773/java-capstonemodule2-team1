@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +109,12 @@ public class JdbcUserDao implements UserDao {
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data integrity violation", e);
         }
+    }
+
+    @Override
+    public User getLoggedInUserByPrinciple(Principal principal) {
+        String username = principal.getName();
+        return getUserByUsername(username);
     }
 
     private User mapRowToUser(SqlRowSet rs) {

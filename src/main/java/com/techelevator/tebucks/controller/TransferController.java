@@ -37,20 +37,6 @@ public class TransferController {
         this.transferStatusUpdateDto = transferStatusUpdateDto;
     }
 
-    @GetMapping("/account/balance")
-    public Account getAccount(Principal principal) {
-        User loggedInUser = getLoggedInUserByPrincipal(principal);
-        int userId = loggedInUser.getId();
-        return accountDao.getAccount(userId);
-    }
-
-    @GetMapping("/account/transfers")
-    public List<Transfer> getAccountTransfers(Principal principal) {
-        User loggedInUser = getLoggedInUserByPrincipal(principal);
-        int userId = loggedInUser.getId();
-        return transferDao.getAccountTransfers(userId);
-    }
-
     @GetMapping("/transfers/{id}")
     public Transfer getTransferById(@PathVariable int id) {
         Transfer transfer = transferDao.getTransferById(id);
@@ -71,7 +57,7 @@ public class TransferController {
         int toUserId = toUser.getId();
         double amount = createdTransfer.getAmount();
 
-        Account account = accountDao.getAccount(fromUserId);
+        Account account = accountDao.getAccountByUserId(fromUserId);
 
         if (createdTransfer.getTransferType().equals("Send") && amount > account.getBalance()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sent more money than in balance");
@@ -96,7 +82,7 @@ public class TransferController {
 
         transferToUpdate.setTransferId(id);
 
-        User loggedInUser = getLoggedInUserByPrincipal(principal);
+        User loggedInUser = userDao.getLoggedInUserByPrinciple(principal);
         User fromUser = transferToUpdate.getUserFrom();
         int fromUserId = fromUser.getId();
         User toUser = transferToUpdate.getUserTo();
@@ -107,24 +93,6 @@ public class TransferController {
         }
 
         return transferDao.updateTransfer(transferStatus, id);
-    }
-
-    private User getLoggedInUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userDao.getUserByUsername(username);
-    }
-
-    @GetMapping("/users")
-    public List<User> getUserList(Principal principal) {
-        User loggedInUser = getLoggedInUserByPrincipal(principal);
-        int userId = loggedInUser.getId();
-        List<User> users = userDao.getUserList(userId);
-
-        if (users.isEmpty()) {
-            throw new DaoException("No users to display.");
-        }
-
-        return users;
     }
 
 }

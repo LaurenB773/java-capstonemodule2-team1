@@ -33,14 +33,14 @@ public class JdbcTransferDao implements TransferDao {
     }
 
     @Override
-    public List<Transfer> getAccountTransfers(int userFromId) {
+    public List<Transfer> getAccountTransfers(int loggedInUserId) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "select * from transfers " +
-                "where user_from_id = ? " +
+                "where user_from_id = ? or user_to_id = ? " +
                 "order by transfer_id;";
 
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userFromId);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, loggedInUserId, loggedInUserId);
 
             while (results.next()) {
                 Transfer transfer = mapToTransfer(results);
@@ -73,107 +73,67 @@ public class JdbcTransferDao implements TransferDao {
     }
 
     @Override
-    public Transfer createTransfer(NewTransferDto newTransfer) {
-        String sql = "insert into transfers (user_from_id, user_to_id, amount_to_transfer, transfer_type) " +
-                "values(?, ?, ?, ?) returning transfer_id;";
+    public Transfer createTransfer(NewTransferDto newTransferDto) {
+        String sql = "insert into transfers " +
+                "(user_from_id, user_to_id, amount_to_transfer, status, transfer_type) " +
+                "values(?, ?, ?, ?, ?) returning transfer_id;";
 
-        int userFrom = newTransfer.getUserFrom();
-        int userTo = newTransfer.getUserTo();
-        double amount = newTransfer.getAmount();
-        String type = newTransfer.getTransferType();
+        String status = "Pending";
 
+        if (newTransferDto.getTransferType().equals("Send")) {
+            status = getStatus(newTransferDto, isTransferValid(newTransferDto));
+        }
+
+        Transfer createdTransfer;
         try {
             Integer transferId = jdbcTemplate.queryForObject(sql, Integer.class,
-                    userFrom, userTo, amount, type);
+                    newTransferDto.getUserFrom(), newTransferDto.getUserTo(), newTransferDto.getAmount(),
+                    status, newTransferDto.getTransferType());
 
             if (transferId == null) {
                 throw new DaoException("Could not create transfer.");
             }
 
-            if (type.equals("Request")) {
-                sql = "UPDATE transfers " +
-                        "SET status = 'Pending' " +
-                        "WHERE transfer_id = ?;";
-
-                int rowsAffected = jdbcTemplate.update(sql, transferId);
-
-                if (rowsAffected == 0) {
-                    throw new DaoException("Zero rows affected, expecting at least one.");
-                }
-            }
-
-            User fromUser = userDao.getUserById(userFrom);
-            User toUser = userDao.getUserById(userTo);
-
-            Account fromUserAccount = accountDao.getAccount(fromUser.getId());
-            Account toUserAccount = accountDao.getAccount(toUser.getId());
-
-            TearsLogDto logDto = new TearsLogDto();
-            logDto.setUsername_from(fromUser.getUsername());
-            logDto.setUsername_to(toUser.getUsername());
-            logDto.setAmount(amount);
-
-            if (type.equals("Send") && (amount < 0 || amount > fromUserAccount.getBalance())) {
-                sql = "UPDATE transfers " +
-                        "SET status = 'Rejected' " +
-                        "WHERE transfer_id = ?;";
-
-                int rowsAffected = jdbcTemplate.update(sql, transferId);
-
-                if (rowsAffected == 0) {
-                    throw new DaoException("Zero rows affected, expecting at least one.");
-                }
-
-                logDto.setDescription("Not a valid amount to send");
-                tearsService.addLog(logDto);
-            }
-
-            if (type.equals("Send") && amount >= 1000) {
-                logDto.setUsername_from(fromUser.getUsername());
-                logDto.setUsername_to(toUser.getUsername());
-                logDto.setAmount(amount);
-                logDto.setDescription("Sent $1000 or more");
-                tearsService.addLog(logDto);
-            }
-
-            return getTransferById(transferId);
-
+            createdTransfer = getTransferById(transferId);
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data integrity violation", e);
         }
 
+        if (createdTransfer.getTransferStatus().equals("Rejected")) {
+            recordTears(addToTearsLog(createdTransfer));
+        }
+
+        return createdTransfer;
     }
 
     @Override
-    public Transfer updateTransfer(TransferStatusUpdateDto transfer, int transferId) {
+    public Transfer updateTransfer(TransferStatusUpdateDto transferStatusUpdateDto, int transferId) {
         Transfer updatedTransfer = getTransferById(transferId);
         String sql = "update transfers set status = ? where transfer_id = ?;";
 
+        String status = transferStatusUpdateDto.getTransferStatus();
+
+        Account userFromAccount = accountDao.getAccountByUserId(updatedTransfer.getUserFrom().getId());
+        if(updatedTransfer.getAmount() > userFromAccount.getBalance()) {
+            status = "Rejected";
+        }
+
         try {
-            int rowsAffected = jdbcTemplate.update(sql, transfer.getTransferStatus(), transferId);
+            int rowsAffected = jdbcTemplate.update(sql, status, transferId);
 
             if (rowsAffected == 0) {
                 throw new DaoException("Zero rows affected, expected at least one.");
             }
 
-            accountDao.updateBalance(updatedTransfer.getUserFrom().getId(),
-                    updatedTransfer.getUserTo().getId(), updatedTransfer.getAmount());
-
             updatedTransfer = getTransferById(updatedTransfer.getTransferId());
 
             if (updatedTransfer.getTransferStatus().equals("Rejected")) {
-                User fromUser = updatedTransfer.getUserFrom();
-                User toUser = updatedTransfer.getUserTo();
-                double amount = updatedTransfer.getAmount();
-
-                TearsLogDto logDto = new TearsLogDto();
-                logDto.setUsername_from(fromUser.getUsername());
-                logDto.setUsername_to(toUser.getUsername());
-                logDto.setAmount(amount);
-                logDto.setDescription("Status = rejected");
-                tearsService.addLog(logDto);
+                recordTears(addToTearsLog(updatedTransfer));
+            } else {
+                accountDao.updateBalance(updatedTransfer.getUserFrom().getId(),
+                        updatedTransfer.getUserTo().getId(), updatedTransfer.getAmount());
             }
 
         } catch (CannotGetJdbcConnectionException e) {
@@ -198,6 +158,44 @@ public class JdbcTransferDao implements TransferDao {
         transfer.setTransferStatus(results.getString("status"));
         transfer.setTransferType(results.getString("transfer_type"));
         return transfer;
+    }
+
+    private TearsLogDto addToTearsLog(Transfer transfer) {
+        TearsLogDto logDto = new TearsLogDto();
+        logDto.setUsername_from(transfer.getUserFrom().getUsername());
+        logDto.setUsername_to(transfer.getUserTo().getUsername());
+        logDto.setAmount(transfer.getAmount());
+        logDto.setDescription("Transfer status rejected"); //TODO: better messages?
+        return logDto;
+    }
+
+    private void recordTears(TearsLogDto tearsLogDto) {
+        tearsService.addLog(tearsLogDto);
+    }
+
+    private boolean isTransferValid(NewTransferDto newTransferDto) {
+        boolean isTransferValid = false;
+
+        int userFrom = newTransferDto.getUserFrom();
+        double amount = newTransferDto.getAmount();
+
+        Account userFromBalance = accountDao.getAccountByUserId(userFrom);
+
+        if (amount > 0 && amount < userFromBalance.getBalance()) {
+            isTransferValid = true;
+        }
+        return isTransferValid;
+    }
+
+    private String getStatus(NewTransferDto newTransferDto, boolean isTransferValid) {
+        String status = null;
+
+        if (newTransferDto.getTransferType().equals("Send") && isTransferValid) {
+           status = "Approved";
+        } else if (newTransferDto.getTransferType().equals("Send") && !isTransferValid) {
+            status = "Rejected";
+        }
+        return status;
     }
 
 }

@@ -20,16 +20,16 @@ public class JdbcAccountDaoTests extends BaseDaoTests {
 
     @Test
     public void getAccount_returns_correct_account_with_valid_id() {
-        Account account1 = sut.getAccount(1);
+        Account account1 = sut.getAccountByUserId(1);
         assertAccountsMatch(ACCOUNT_1, account1);
 
-        Account account2 = sut.getAccount(2);
+        Account account2 = sut.getAccountByUserId(2);
         assertAccountsMatch(ACCOUNT_2, account2);
     }
 
     @Test
     public void getAccount_returns_null_with_invalid_id() {
-        Account account = sut.getAccount(-1);
+        Account account = sut.getAccountByUserId(-1);
         Assert.assertNull(account);
     }
 

@@ -18,11 +18,11 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public Account getAccount(int id) {
+    public Account getAccountByUserId(int userId) {
         Account account = new Account();
-        String sql = "select * from accounts where user_id = ?;";
+        String sql = "select account_id, user_id, balance from accounts where user_id = ?;";
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
             if (results.next()) {
                 account.setAccountId(results.getInt("account_id"));
                 account.setUserId(results.getInt("user_id"));
@@ -42,13 +42,9 @@ public class JdbcAccountDao implements AccountDao {
                 "where user_id = ?; " +
                 "update accounts set balance = (balance + ?) " +
                 "where user_id = ?; " +
-                "commit;";
+                "commit; ";
         try {
-            int rowsAffected = jdbcTemplate.update(sql, amount, fromUserId, amount, toUserId);
-
-            if (rowsAffected != 2) {
-                throw new DaoException("Unexpected amount of rows expected. Expecting two rows.");
-            }
+            jdbcTemplate.update(sql, amount, fromUserId, amount, toUserId);
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Could not connect.", e);
